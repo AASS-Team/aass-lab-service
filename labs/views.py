@@ -34,9 +34,7 @@ class LabsList(APIView):
 
         serializer.save(available=True)
         return Response(
-            data={
-                "message": "Laboratórium uložené",
-            },
+            serializer.data,
             status=status.HTTP_201_CREATED,
         )
 
@@ -55,7 +53,7 @@ class LabDetail(APIView):
     def get(self, request, id, format=None):
         lab = self.get_object(id)
         serializer = serializers.LabSerializer(lab)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def put(self, request, id, format=None):
         lab = self.get_object(id)
@@ -71,14 +69,10 @@ class LabDetail(APIView):
             )
 
         serializer.save()
-        return Response(data={"message": "Laboratórium uložené"})
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def delete(self, request, id, format=None):
         lab = self.get_object(id)
         lab.delete()
 
-        return Response(
-            data={
-                "message": "Laboratórium vymazané",
-            },
-        )
+        return Response(status=status.HTTP_204_NO_CONTENT)
