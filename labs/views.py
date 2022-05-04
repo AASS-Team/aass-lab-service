@@ -27,14 +27,13 @@ class LabsList(APIView):
             return Response(
                 data={
                     "errors": serializer.errors,
-                    "message": "Nepodarilo sa uložiť laboratórium",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         serializer.save(available=True)
         return Response(
-            serializer.data,
+            data=serializer.data,
             status=status.HTTP_201_CREATED,
         )
 
@@ -53,7 +52,7 @@ class LabDetail(APIView):
     def get(self, request, id, format=None):
         lab = self.get_object(id)
         serializer = serializers.LabSerializer(lab)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     def put(self, request, id, format=None):
         lab = self.get_object(id)
@@ -62,17 +61,24 @@ class LabDetail(APIView):
         if not serializer.is_valid():
             return Response(
                 data={
-                    "message": "Nepodarilo sa uložiť laboratórium",
                     "errors": serializer.errors,
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     def delete(self, request, id, format=None):
         lab = self.get_object(id)
-        lab.delete()
+        deleted_rows = lab.delete()
+
+        if len(deleted_rows) <= 0:
+            return Response(
+                data={
+                    "errors": {"global": "Nepodarilo sa vymazať laboratórium"},
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
         return Response(status=status.HTTP_204_NO_CONTENT)
